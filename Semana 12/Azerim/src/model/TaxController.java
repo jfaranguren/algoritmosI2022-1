@@ -13,13 +13,21 @@ public class TaxController {
 	}
 
 	public boolean registerTax(String name, String description, double taxableBase, double fixedCharge,
-			double variableCharge) {
+			double variableCharge, int taxType) {
 
 		boolean taxAdded = false;
 
 		for (int i = 0; (i < taxes.length) && !taxAdded; i++) {
 			if (taxes[i] == null) {
-				taxes[i] = new Tax(name, description, taxableBase, fixedCharge, variableCharge);
+
+				if (taxType == 1) {
+					taxes[i] = new FixedTax(name, description, taxableBase, fixedCharge);
+				}
+
+				if (taxType == 2) {
+					taxes[i] = new VariableTax(name, description, variableCharge);
+				}
+
 				taxAdded = true;
 			}
 		}
@@ -96,9 +104,17 @@ public class TaxController {
 
 						if (taxes[i].getName().equals("IVA")) {
 							// sales * 0.10
-							double taxIVA = taxReportTemp.getSales() * taxes[i].getVariableCharge();
-							taxes[i].setTotalMoneyCollected(taxes[i].getTotalMoneyCollected() + taxIVA);
-							taxTotal += taxIVA;
+
+							if (taxes[i] instanceof VariableTax) {
+
+								VariableTax temp = (VariableTax) taxes[i];
+
+								double taxIVA = taxReportTemp.getSales() * temp.getVariableCharge();
+								taxes[i].setTotalMoneyCollected(taxes[i].getTotalMoneyCollected() + taxIVA);
+								taxTotal += taxIVA;
+
+							}
+
 						}
 					}
 				}
@@ -113,12 +129,18 @@ public class TaxController {
 
 						if (taxes[i].getName().equals("RENT")) {
 
-							// (income % 1000000) * 200000;
-							double taxRent = (taxReportTemp.getIncome() % taxes[i].getTaxableBase())
-									* taxes[i].getFixedCharge();
-							taxes[i].setTotalMoneyCollected(taxes[i].getTotalMoneyCollected() + taxRent);
-							taxTotal += taxRent;
+							if (taxes[i] instanceof FixedTax) {
+
+								FixedTax temp = (FixedTax) taxes[i];
+
+								// (income % 1000000) * 200000;
+								double taxRent = (taxReportTemp.getIncome() % temp.getTaxableBase())
+										* temp.getFixedCharge();
+								taxes[i].setTotalMoneyCollected(taxes[i].getTotalMoneyCollected() + taxRent);
+								taxTotal += taxRent;
+							}
 						}
+
 					}
 
 				}
@@ -133,12 +155,16 @@ public class TaxController {
 
 						if (taxes[i].getName().equals("EQUITY")) {
 
-							// (Equity % 50000000) * 500000
-							double taxEquity = (taxReportTemp.getEquity() % taxes[i].getTaxableBase())
-									* taxes[i].getFixedCharge();
-							taxes[i].setTotalMoneyCollected(taxes[i].getTotalMoneyCollected() + taxEquity);
-							taxTotal += taxEquity;
+							if (taxes[i] instanceof FixedTax) {
 
+								FixedTax temp = (FixedTax) taxes[i];
+
+								// (Equity % 50000000) * 500000
+								double taxEquity = (taxReportTemp.getIncome() % temp.getTaxableBase())
+										* temp.getFixedCharge();
+								taxes[i].setTotalMoneyCollected(taxes[i].getTotalMoneyCollected() + taxEquity);
+								taxTotal += taxEquity;
+							}
 						}
 					}
 
@@ -206,11 +232,27 @@ public class TaxController {
 
 		if (taxes[taxPosition - 1] != null) {
 
+			if ((taxes[taxPosition - 1] instanceof FixedTax)) {
+
+				FixedTax temp = (FixedTax) taxes[taxPosition - 1];
+
+				temp.setTaxableBase(taxableBase);
+				temp.setFixedCharge(fixedCharge);
+
+				taxes[taxPosition - 1] = temp;
+
+			} else if ((taxes[taxPosition - 1] instanceof VariableTax)) {
+
+				VariableTax temp = (VariableTax) taxes[taxPosition - 1];
+
+				temp.setVariableCharge(variableCharge);
+
+				taxes[taxPosition - 1] = temp;
+
+			}
+
 			taxes[taxPosition - 1].setName(name);
 			taxes[taxPosition - 1].setDescription(description);
-			taxes[taxPosition - 1].setTaxableBase(taxableBase);
-			taxes[taxPosition - 1].setFixedCharge(fixedCharge);
-			taxes[taxPosition - 1].setVariableCharge(variableCharge);
 			taxes[taxPosition - 1].setTotalMoneyCollected(0);
 
 			editedFlag = true;
@@ -250,31 +292,63 @@ public class TaxController {
 
 		if (taxes[taxPosition - 1] != null) {
 
-			switch (attribute) {
+			if (taxes[taxPosition - 1] instanceof FixedTax) {
 
-			case 1:
-				taxes[taxPosition - 1].setName(attributeToChange);
-				break;
+				FixedTax temp = (FixedTax) taxes[taxPosition - 1];
 
-			case 2:
-				taxes[taxPosition - 1].setDescription(attributeToChange);
-				break;
+				switch (attribute) {
 
-			case 3:
-				taxes[taxPosition - 1].setTaxableBase(Double.parseDouble(attributeToChange));
-				break;
+				case 1:
+					temp.setName(attributeToChange);
+					break;
 
-			case 4:
-				taxes[taxPosition - 1].setFixedCharge(Double.parseDouble(attributeToChange));
-				break;
+				case 2:
+					temp.setDescription(attributeToChange);
+					break;
 
-			case 5:
-				taxes[taxPosition - 1].setVariableCharge(Double.parseDouble(attributeToChange));
-				break;
+				case 3:
+					temp.setTaxableBase(Double.parseDouble(attributeToChange));
+					break;
 
-			case 6:
-				taxes[taxPosition - 1].setTotalMoneyCollected(Double.parseDouble(attributeToChange));
-				break;
+				case 4:
+					temp.setFixedCharge(Double.parseDouble(attributeToChange));
+					break;
+
+				case 5:
+					temp.setTotalMoneyCollected(Double.parseDouble(attributeToChange));
+					break;
+
+				}
+
+				taxes[taxPosition - 1] = temp;
+				editedFlag = true;
+
+			} else if (taxes[taxPosition - 1] instanceof VariableTax) {
+
+				VariableTax temp = (VariableTax) taxes[taxPosition - 1];
+
+				switch (attribute) {
+
+				case 1:
+					temp.setName(attributeToChange);
+					break;
+
+				case 2:
+					temp.setDescription(attributeToChange);
+					break;
+
+				case 3:
+					temp.setVariableCharge(Double.parseDouble(attributeToChange));
+					break;
+
+				case 4:
+					temp.setTotalMoneyCollected(Double.parseDouble(attributeToChange));
+					break;
+
+				}
+
+				taxes[taxPosition - 1] = temp;
+				editedFlag = true;
 
 			}
 

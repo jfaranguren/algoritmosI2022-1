@@ -89,23 +89,34 @@ public class TaxManager {
 
 	private static void registerTax() {
 
-		System.out.println("Select the new Tax name:");
+		System.out.println("Select the Tax type: \n1. Fixed\n2. Variable");
+		int taxType = reader.nextInt();
+
+		System.out.println("Select the new Tax's name:");
 		String name = reader.nextLine();
 		name = reader.nextLine();
 
-		System.out.println("Type the new Tax description: ");
+		System.out.println("Type the new Tax's description: ");
 		String description = reader.nextLine();
-		
-		System.out.println("Type the new Tax taxable base: ");
-		double taxableBase = reader.nextDouble();
 
-		System.out.println("Type the new Tax fixed charge: ");
-		double fixedCharge = reader.nextDouble();
+		double taxableBase = -1;
+		double fixedCharge = -1;
+		double variableCharge = -1;
 
-		System.out.println("Type the new Tax variable charge: ");
-		double variableCharge = reader.nextDouble();
+		if (taxType == 1) {
+			System.out.println("Type the new Tax's taxable base: ");
+			taxableBase = reader.nextDouble();
 
-		if (taxControl.registerTax(name, description, taxableBase, fixedCharge, variableCharge)) {
+			System.out.println("Type the new Tax's fixed charge: ");
+			fixedCharge = reader.nextDouble();
+		} else if (taxType == 2) {
+
+			System.out.println("Type the new Tax's variable charge: ");
+			variableCharge = reader.nextDouble();
+
+		}
+
+		if (taxControl.registerTax(name, description, taxableBase, fixedCharge, variableCharge, taxType)) {
 
 			System.out.println("Tax registered successfully");
 
@@ -126,6 +137,7 @@ public class TaxManager {
 
 			System.out.println("Select the new Tax name:");
 			String name = reader.nextLine();
+			name = reader.nextLine();
 
 			System.out.println("Type the new Tax description: ");
 			String description = reader.nextLine();
@@ -164,61 +176,25 @@ public class TaxManager {
 
 			System.out.println(taxControl.getTaxInfo(taxPosition));
 
-			System.out.println(
-					"Select the attribute you want to edit: \n1. Name\n2. Description\n3. Taxable base\n4. Fixed charge\n5. Variable charge\n6. Money collected");
-			int attribute = reader.nextInt();
-
+			int attribute = -1;
 			String attributeToChange = "";
 
-			switch (attribute) {
+			if (taxControl.getTaxInfo(taxPosition).contains("FixedTax")) {
 
-			case 1:
+				System.out.println(
+						"Select the attribute you want to edit: \n1. Name\n2. Description\n3. Taxable base\n4. Fixed charge\n5. Money collected");
+				attribute = reader.nextInt();
 
-				System.out.println("Select the new Tax name:");
-				attributeToChange = reader.nextLine();
-				attributeToChange = reader.nextLine();
-
-				break;
-
-			case 2:
-
-				System.out.println("Type the new Tax description: ");
-				attributeToChange = reader.nextLine();
+				System.out.println("Type the new value of the attribute");
 				attributeToChange = reader.nextLine();
 
-				break;
+			} else if (taxControl.getTaxInfo(taxPosition).contains("VariableTax")) {
 
-			case 3:
-
-				System.out.println("Type the new Tax taxable base: ");
+				System.out.println(
+						"Select the attribute you want to edit: \n1. Name\n2. Description\n3. Variable charge\n4. Money collected");
+				attribute = reader.nextInt();
+				System.out.println("Type the new value of the attribute");
 				attributeToChange = reader.nextLine();
-				attributeToChange = reader.nextLine();
-
-				break;
-
-			case 4:
-
-				System.out.println("Type the new Tax fixed charge: ");
-				attributeToChange = reader.nextLine();
-				attributeToChange = reader.nextLine();
-
-				break;
-
-			case 5:
-
-				System.out.println("Type the new Tax variable charge: ");
-				attributeToChange = reader.nextLine();
-				attributeToChange = reader.nextLine();
-
-				break;
-
-			case 6:
-
-				System.out.println("Type the new Tax money collected: ");
-				attributeToChange = reader.nextLine();
-				attributeToChange = reader.nextLine();
-
-				break;
 
 			}
 
